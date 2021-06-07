@@ -47,7 +47,7 @@ export default function SignupForm(props) {
     }
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="auth-form">
             <h4>Sign Up</h4> 
             <label htmlFor="username">Username</label>
             <input

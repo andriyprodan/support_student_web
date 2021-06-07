@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import './App.css';
+import './css/App.css';
 import {BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
 import Nav from './components/Nav';
@@ -42,26 +42,33 @@ function App() {
 
   return (
     <Router>
-      <Nav
-        loggedIn={loggedIn}
-        handleLogout={handleLogout}
-      />
+      <header id="main-header">
+        <div className="container">
+          <div className="logo">Logo</div>
+          <Nav
+            loggedIn={loggedIn}
+            handleLogout={handleLogout}
+          />
+        </div>
+      </header>
       <Switch>
-        <Route exact path="/">Hello, {username}</Route>
-        <Route path="/login" render={(props) => 
-          <LoginForm 
-            {...props} 
-            loggedIn={loggedIn} 
-            successfulAuthCallback={handleSuccessfulAuth}
-          />}
-        />
-        <Route path="/signup" render={(props) => 
-          <SignupForm 
-            {...props} 
-            loggedIn={loggedIn} 
-            successfulAuthCallback={handleSuccessfulAuth}
-          />}
-        />
+        <main className="container">
+          <Route exact path="/">Hello, {username}</Route>
+          <Route path="/login" render={(props) => 
+            <LoginForm 
+              {...props}
+              loggedIn={loggedIn}
+              successfulAuthCallback={handleSuccessfulAuth}
+            />}
+          />
+          <Route path="/signup" render={(props) => 
+            <SignupForm 
+              {...props} 
+              loggedIn={loggedIn} 
+              successfulAuthCallback={handleSuccessfulAuth}
+            />}
+          />
+        </main>
       </Switch>
     </Router>
   );

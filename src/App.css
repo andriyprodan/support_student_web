@@ -3,6 +3,10 @@ body {
   margin: 0;
 }
 
+ul {
+  margin-top: 1rem;
+}
+
 .container {
   max-width: 1600px;
   margin: 0 auto;
@@ -45,5 +49,16 @@ body {
 
 main {
   padding: 2em 0;
+}
+
+.create-question-form {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.content-editable-textarea {
+  min-height: 400px;
+  padding: 1em;
+  border: 1px solid #ced4da;
 }
 /*# sourceMappingURL=App.css.map */

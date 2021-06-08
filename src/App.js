@@ -1,10 +1,11 @@
 import React, {useState, useEffect} from 'react';
-import './css/App.css';
-import {BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import './App.css';
+import {BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
 import Nav from './components/Nav';
-import LoginForm from './components/LoginForm';
-import SignupForm from './components/SignupForm';
+import CreateQuestion from './components/CreateQuestion';
+import LoginForm from './auth/LoginForm';
+import SignupForm from './auth/SignupForm';
 import axiosInstance from './axiosApi';
 
 function App() {
@@ -53,16 +54,24 @@ function App() {
       </header>
       <Switch>
         <main className="container">
-          <Route exact path="/">Hello, {username}</Route>
+          <Route exact path="/">
+            <div>Hello, {username}</div>
+            <button className="btn btn-success">
+              <Link to="/create-question">Create question</Link>
+            </button>
+          </Route>
+          <Route path="/create-question">
+            <CreateQuestion></CreateQuestion>
+          </Route>
           <Route path="/login" render={(props) => 
-            <LoginForm 
+            <LoginForm
               {...props}
               loggedIn={loggedIn}
               successfulAuthCallback={handleSuccessfulAuth}
             />}
           />
           <Route path="/signup" render={(props) => 
-            <SignupForm 
+            <SignupForm
               {...props} 
               loggedIn={loggedIn} 
               successfulAuthCallback={handleSuccessfulAuth}

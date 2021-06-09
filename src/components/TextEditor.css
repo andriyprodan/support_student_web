@@ -35,6 +35,7 @@
 .markdown-content > * {
   width: 50%;
   padding: 1em;
+  min-height: 400px;
 }
 
 .markdown-textarea {

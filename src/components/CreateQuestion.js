@@ -1,6 +1,9 @@
 import React, {useState, useEffect} from 'react';
 
-import TextEditor from './TextEditor'
+import './CreateQuestion.css';
+import TextEditor from './TextEditor';
+
+import { default as axiosInstance, baseURL } from '../axiosApi';
 
 function CreateQuestion() {
     const [title, setTitle] = useState('');
@@ -12,7 +15,12 @@ function CreateQuestion() {
                 <label htmlFor="question-title">Question Title</label>
                 <input type="text" className="form-control" id="question-title"/>
             </div>
-            <TextEditor label="Question content" name="question-content" />
+            <TextEditor 
+                label="Question content"
+                name="question-content"
+                axiosInstance={axiosInstance}
+                uploadImagesURL={baseURL + 'upload_question_image/'}
+            />
         </form>
     )
 }

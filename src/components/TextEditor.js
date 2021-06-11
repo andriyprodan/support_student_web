@@ -88,10 +88,55 @@ function TextEditor(props) {
  
         wrapSelectedText(` [${descriptionPlaceholder}](${protocol}`, ') ', linkPlaceholder);
     }
+    
+    function toggleImageUploadDialogue() {
+        let tab = window.$('.image-upload-dialogue');
+        
+        if (tab.hasClass('active')) {
+            tab.css('max-height', '0').on('transitionend', () => {
+                tab.css('display', 'none');
+            }).unbind('transitionend');
+        } else {
+            // call outerWidth to force reflow
+            tab.css('display', 'flex').outerWidth();
+            tab.css('max-height', '700px');
+        }
+
+        tab.toggleClass('active');
+    }
+
+    function handleImagePreview(e) {
+        let file = e.target.files[0];
+        let fr = new FileReader();
+        fr.onload = (e) => {
+            let bgImage = 'url("' + e.target.result + '")';
+            document.getElementById('image-preview').style.backgroundImage = bgImage;
+        }
+        fr.readAsDataURL(file);
+    }
+
+    async function handleAddImageBtnClick(e) {
+        e.preventDefault();
+        let input = document.getElementById('image-input');
+        if (!input.files[0]) {
+            alert('Please, add an image!');
+            return;
+        }
+        let formData = new FormData();
+        formData.append('image', input.files[0]);
+        try {
+            let resp = await props.axiosInstance.post(props.uploadImagesURL, formData);
+            let image = `\n![Image info](${resp.data.url})`;
+            setContent(content + image);
+            toggleImageUploadDialogue();
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     return (
         <div className="form-group">
-            <div>{ props.label }</div>
+            <div className="content-label">{ props.label }</div>
             <div className="markdown-control-panel">
                 <div className="text-type">
                     <i className="fa fa-bold" onClick={handleBoldIconClick}></i>
@@ -100,7 +145,21 @@ function TextEditor(props) {
 
                 <div className="text-format">
                     <i className="fa fa-link" onClick={handleHyperlinkIconClick}></i>
-                    <i className="fa fa-image"></i>
+                    <i className="fa fa-image" onClick={toggleImageUploadDialogue}></i>
+                </div>
+            </div>
+
+            <div className="image-upload-dialogue" style={{display: 'none', maxHeight: "0"}}>
+                <div className="image-upload-dialogue__inner">
+                    <div id="image-preview"></div>
+                    <div>
+                        <p>Choose image:</p>
+                        <div className="image-input-group">
+                            <label htmlFor="image-input">Choose Image</label>
+                            <input type="file" id="image-input" className="image-input" onChange={handleImagePreview}/>
+                        </div>
+                        <button className="btn btn-info d-b" onClick={handleAddImageBtnClick}>Add Image</button>
+                    </div>
                 </div>
             </div>
 

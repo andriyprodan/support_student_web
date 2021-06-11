@@ -36,7 +36,7 @@ export default function SignupForm(props) {
             axiosInstance.defaults.headers['Authorization'] = 'JWT ' + tokens_resp.data.access;
             localStorage.setItem('access_token', tokens_resp.data.access);
             localStorage.setItem('refresh_token', tokens_resp.data.refresh);
-            // set global App variable 'username'
+            // set global App state 'username'
             props.successfulAuthCallback(username);
             props.history.push('/');
 

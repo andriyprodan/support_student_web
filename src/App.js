@@ -17,7 +17,7 @@ function App() {
       setUsername(json.data.username);
       setLoggedIn(true);
     })
-  })
+  }, [username])
 
   const handleSuccessfulAuth = (username) => {
     setLoggedIn(true);

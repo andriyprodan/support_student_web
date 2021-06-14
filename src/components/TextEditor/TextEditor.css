@@ -48,6 +48,7 @@
 .markdown-result {
   border: 1px solid #ced4da;
   border-left: none;
+  overflow-wrap: break-word;
 }
 
 .markdown-result img {
@@ -98,7 +99,7 @@
 #image-preview {
   height: 150px;
   width: 150px;
-  background-image: url("../images/image_placeholder.jpg");
+  background-image: url("./images/image_placeholder.jpg");
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;

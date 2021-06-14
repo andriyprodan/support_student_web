@@ -12,9 +12,31 @@ function TextEditor(props) {
     const [content, setContent] = useState('');
     const [selection, setSelection] = useState({selectTextOnComponentUpdate: false});
 
+    const [history, setHistory] = useState([content]);
+    const [currContentIndex, setCurrContentIndex] = useState(0);
+
     useEffect(() => {
+        if (history[currContentIndex] !== content){
+            console.log('!!', currContentIndex, content);
+            setHistory(history.slice(0, currContentIndex+1).concat([content]));
+            setCurrContentIndex(currContentIndex + 1);
+        }
+
+        let textArea = document.getElementById("markdown-textarea");
+        textArea.onkeydown = (e) => {
+            if (e.ctrlKey) {
+                if (e.key == 'z') {
+                    e.preventDefault();
+                    console.log('!', history[currContentIndex - 1], currContentIndex - 1);
+                    undo();
+                } else if (e.key == 'y') {
+                    e.preventDefault();
+                    redo();
+                }
+            }
+        }
+
         if (selection.selectTextOnComponentUpdate) {
-            let textArea = document.getElementById("markdown-textarea");
             textArea.focus();
             textArea.setSelectionRange(selection.start, selection.end);
             textArea.selectionEnd = selection.end;
@@ -23,7 +45,22 @@ function TextEditor(props) {
                 selectTextOnComponentUpdate: false,
             })
         }
-    }, [selection]);
+    }, [selection, content, history, currContentIndex]);
+
+    function undo() {
+        console.log('!', history[currContentIndex - 1], currContentIndex - 1);
+        if (currContentIndex - 1 >= 0) {
+            setContent(history[currContentIndex - 1]);
+            setCurrContentIndex(currContentIndex - 1);
+        }
+    }
+
+    function redo() {
+        if (currContentIndex + 1 <= history.length - 1) {
+            setContent(history[currContentIndex + 1]);
+            setCurrContentIndex(currContentIndex + 1);
+        }
+    }
 
     function handleContentChange(e) {
         setContent(e.target.value);
@@ -56,7 +93,7 @@ function TextEditor(props) {
         let replacement = openTag + text + closeTag;
         let new_content = textArea.value.substring(0, start) + replacement + textArea.value.substring(end, len);
         setContent(new_content);
-        
+
         if (selectWrappedText) {
             setSelection({
                 selectTextOnComponentUpdate: true,
@@ -134,6 +171,14 @@ function TextEditor(props) {
         }
     }
 
+    function toggleOrderedListIconClick() {
+        // coming soon
+    }
+
+    function toggleUnorderedListIconClick() {
+        // coming soon
+    }
+
     return (
         <div className="form-group">
             <div className="content-label">{ props.label }</div>
@@ -146,6 +191,16 @@ function TextEditor(props) {
                 <div className="text-format">
                     <i className="fa fa-link" onClick={handleHyperlinkIconClick}></i>
                     <i className="fa fa-image" onClick={toggleImageUploadDialogue}></i>
+                </div>
+
+                <div className="lists">
+                    <i className="fa fa-list-ol" onClick={toggleOrderedListIconClick}></i>
+                    <i className="fa fa-list" onClick={toggleUnorderedListIconClick}></i>
+                </div>
+
+                <div className="undo-redo">
+                    <i className="fa fa-undo" onClick={undo}></i>
+                    <i className="fa fa-redo" onClick={redo}></i>
                 </div>
             </div>
 
@@ -184,3 +239,4 @@ function TextEditor(props) {
 }
 
 export default TextEditor;
+

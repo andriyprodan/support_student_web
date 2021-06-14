@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 
 import './CreateQuestion.css';
-import TextEditor from './TextEditor';
+import TextEditor from './TextEditor/TextEditor';
 
 import { default as axiosInstance, baseURL } from '../axiosApi';
 

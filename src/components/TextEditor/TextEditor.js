@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
@@ -11,44 +11,49 @@ const PROTOCOLS = ['https://', 'http://']
 function TextEditor(props) {
     const [content, setContent] = useState('');
     const [selection, setSelection] = useState({selectTextOnComponentUpdate: false});
+    const textArea = useRef(null);
 
     const [history, setHistory] = useState([content]);
     const [currContentIndex, setCurrContentIndex] = useState(0);
 
+    function handleContentChange(e) {
+        setContent(e.target.value);
+    }
+
+    // Set selection on the textarea
     useEffect(() => {
-        if (history[currContentIndex] !== content){
-            console.log('!!', currContentIndex, content);
-            setHistory(history.slice(0, currContentIndex+1).concat([content]));
-            setCurrContentIndex(currContentIndex + 1);
-        }
-
-        let textArea = document.getElementById("markdown-textarea");
-        textArea.onkeydown = (e) => {
-            if (e.ctrlKey) {
-                if (e.key == 'z') {
-                    e.preventDefault();
-                    console.log('!', history[currContentIndex - 1], currContentIndex - 1);
-                    undo();
-                } else if (e.key == 'y') {
-                    e.preventDefault();
-                    redo();
-                }
-            }
-        }
-
         if (selection.selectTextOnComponentUpdate) {
-            textArea.focus();
-            textArea.setSelectionRange(selection.start, selection.end);
-            textArea.selectionEnd = selection.end;
+            textArea.current.focus();
+            textArea.current.selectionEnd = selection.end;
+            textArea.current.setSelectionRange(selection.start, selection.end);
             setSelection({
                 ...selection,
                 selectTextOnComponentUpdate: false,
-            })
+            });
         }
-    }, [selection, content, history, currContentIndex]);
+    }, [selection,]);
+
+    useEffect(() => {
+        if (history[currContentIndex] !== content){
+            setHistory(history.slice(0, currContentIndex+1).concat([content]));
+            setCurrContentIndex(currContentIndex + 1);
+        }
+    }, [content, history, currContentIndex]);
+
+    // Undo / Redo
+    function handleTextAreaKeyDown(e) {
+        if (e.ctrlKey) {
+            if (e.key === 'z') {
+                e.preventDefault();
+                undo();
+            } else if (e.key === 'y') {
+                e.preventDefault();
+                redo();
+            }
+        }
+    }
 
     function undo() {
-        console.log('!', history[currContentIndex - 1], currContentIndex - 1);
         if (currContentIndex - 1 >= 0) {
             setContent(history[currContentIndex - 1]);
             setCurrContentIndex(currContentIndex - 1);
@@ -61,24 +66,22 @@ function TextEditor(props) {
             setCurrContentIndex(currContentIndex + 1);
         }
     }
-
-    function handleContentChange(e) {
-        setContent(e.target.value);
-    }
+    
 
     function wrapSelectedText(openTag, closeTag, placeholder='', selectWrappedText = true) {
-        let textArea = document.getElementById("markdown-textarea");
-        let len = textArea.value.length;
-        let start = textArea.selectionStart;
-        let end = textArea.selectionEnd;
+        let ta = textArea.current;
+
+        let len = ta.value.length;
+        let start = ta.selectionStart;
+        let end = ta.selectionEnd;
 
         // check if the selected text is already wrapped into that Tags
         if (
-            textArea.value.substring(start - openTag.length, start) === openTag &&
-            textArea.value.substring(end, end + closeTag.length) === closeTag
+            ta.value.substring(start - openTag.length, start) === openTag &&
+            ta.value.substring(end, end + closeTag.length) === closeTag
         ) {
             // remove tags
-            let arr = textArea.value.split('');
+            let arr = ta.value.split('');
             arr.splice(start - openTag.length, openTag.length, '');
             // subtract openTag.length - 1, because length of array is decreased by this number
             // -1, because an empty string('') is added to array after splice
@@ -87,11 +90,11 @@ function TextEditor(props) {
             return;
         }
 
-        let selectedText = textArea.value.substring(start, end);
+        let selectedText = ta.value.substring(start, end);
         // If there is no selected text (selectionStart and selectionEnd are the same) placeholder is used
         let text = start === end ? placeholder : selectedText
         let replacement = openTag + text + closeTag;
-        let new_content = textArea.value.substring(0, start) + replacement + textArea.value.substring(end, len);
+        let new_content = ta.value.substring(0, start) + replacement + ta.value.substring(end, len);
         setContent(new_content);
 
         if (selectWrappedText) {
@@ -112,8 +115,9 @@ function TextEditor(props) {
     }
 
     function handleHyperlinkIconClick() {
-        let textArea = document.getElementById("markdown-textarea");
-        let selectedText = textArea.value.substring(textArea.selectionStart, textArea.selectionEnd);
+        let ta = textArea.current;
+
+        let selectedText = ta.value.substring(ta.selectionStart, ta.selectionEnd);
 
         let descriptionPlaceholder = 'Link description';
         let linkPlaceholder = 'www.example.com'
@@ -126,6 +130,7 @@ function TextEditor(props) {
         wrapSelectedText(` [${descriptionPlaceholder}](${protocol}`, ') ', linkPlaceholder);
     }
     
+
     function toggleImageUploadDialogue() {
         let tab = window.$('.image-upload-dialogue');
         
@@ -142,19 +147,22 @@ function TextEditor(props) {
         tab.toggleClass('active');
     }
 
+    let imageInput = useRef(null);
+    let imagePreview = useRef(null);
+
     function handleImagePreview(e) {
         let file = e.target.files[0];
         let fr = new FileReader();
         fr.onload = (e) => {
             let bgImage = 'url("' + e.target.result + '")';
-            document.getElementById('image-preview').style.backgroundImage = bgImage;
+            imagePreview.current.style.backgroundImage = bgImage;
         }
         fr.readAsDataURL(file);
     }
 
     async function handleAddImageBtnClick(e) {
         e.preventDefault();
-        let input = document.getElementById('image-input');
+        let input = imageInput.current;
         if (!input.files[0]) {
             alert('Please, add an image!');
             return;
@@ -170,6 +178,7 @@ function TextEditor(props) {
             console.log(error);
         }
     }
+    
 
     function toggleOrderedListIconClick() {
         // coming soon
@@ -206,12 +215,12 @@ function TextEditor(props) {
 
             <div className="image-upload-dialogue" style={{display: 'none', maxHeight: "0"}}>
                 <div className="image-upload-dialogue__inner">
-                    <div id="image-preview"></div>
+                    <div id="image-preview" ref={imagePreview}></div>
                     <div>
                         <p>Choose image:</p>
                         <div className="image-input-group">
                             <label htmlFor="image-input">Choose Image</label>
-                            <input type="file" id="image-input" className="image-input" onChange={handleImagePreview}/>
+                            <input type="file" id="image-input" ref={imageInput} className="image-input" onChange={handleImagePreview}/>
                         </div>
                         <button className="btn btn-info d-b" onClick={handleAddImageBtnClick}>Add Image</button>
                     </div>
@@ -225,6 +234,8 @@ function TextEditor(props) {
                     name={props.name}
                     value={content}
                     onChange={handleContentChange}
+                    onKeyDown={handleTextAreaKeyDown}
+                    ref={textArea}
                 ></textarea>
                 <div className="markdown-result">
                     <ReactMarkdown 

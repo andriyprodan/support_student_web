@@ -33,40 +33,74 @@ function TextEditor(props) {
         }
     }, [selection,]);
 
+    let lastBackspacedContent = useRef('');
     useEffect(() => {
-        if (history[currContentIndex] !== content){
-            setHistory(history.slice(0, currContentIndex+1).concat([content]));
+        if (lastBackspacedContent.current.length && lastBackspacedContent.current !== content) {
+            setHistory(history.slice(0, currContentIndex+1).concat([lastBackspacedContent.current]));
             setCurrContentIndex(currContentIndex + 1);
         }
-    }, [content, history, currContentIndex]);
-
-    // Undo / Redo
-    function handleTextAreaKeyDown(e) {
-        if (e.ctrlKey) {
-            if (e.key === 'z') {
-                e.preventDefault();
-                undo();
-            } else if (e.key === 'y') {
-                e.preventDefault();
-                redo();
-            }
+    }, [content]);
+    // set history with delay, when the content changes
+    useEffect(() => {
+        let saveDelay;
+        if (history[currContentIndex] !== content){
+            saveDelay = setTimeout(() => {
+                setHistory(history.slice(0, currContentIndex+1).concat([content]));
+                setCurrContentIndex(currContentIndex + 1);
+            }, 500);
         }
-    }
+
+        return (() => {
+            clearTimeout(saveDelay);
+        });
+    }, [content, history]);
 
     function undo() {
-        if (currContentIndex - 1 >= 0) {
+        if (content !== history[currContentIndex]) {
+            /* immediately save new content before delay ends
+               it happens when the user makes undo action before 
+               the new content is saved in history with delay in useEffect */
+            setHistory(history.slice(0, currContentIndex+1).concat([content]));
+            setContent(history[currContentIndex]);
+        } else if (currContentIndex - 1 >= 0) {
             setContent(history[currContentIndex - 1]);
-            setCurrContentIndex(currContentIndex - 1);
+            setCurrContentIndex(prev => prev - 1);
         }
     }
 
     function redo() {
         if (currContentIndex + 1 <= history.length - 1) {
             setContent(history[currContentIndex + 1]);
-            setCurrContentIndex(currContentIndex + 1);
+            setCurrContentIndex(prev => prev + 1);
         }
     }
-    
+
+    // Undo / Redo shortcuts
+    function handleTextAreaKeyDown(e) {
+        if (e.ctrlKey) {
+            let haveMatched = true;
+            switch (e.key) {
+                case 'z':
+                    undo();
+                    break;
+                case 'y':
+                    redo();
+                    break;
+                default:
+                    haveMatched = false;
+            }
+            if (haveMatched) {
+                e.preventDefault();
+            }
+        }
+
+        let key = e.keyCode || e.charCode;
+        // backspaceClicked
+        if (key == 8 || key == 46) {
+            let taValue = textArea.current.value;
+            lastBackspacedContent.current = taValue.substring(0, taValue.length-1);
+        }
+    }
 
     function wrapSelectedText(openTag, closeTag, placeholder='', selectWrappedText = true) {
         let ta = textArea.current;
@@ -250,4 +284,3 @@ function TextEditor(props) {
 }
 
 export default TextEditor;
-

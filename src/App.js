@@ -8,20 +8,28 @@ import LoginForm from './auth/LoginForm';
 import SignupForm from './auth/SignupForm';
 import axiosInstance from './axiosApi';
 
+export const UserContext = React.createContext(null);
+
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
-  const [username, setUsername] = useState('');
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     axiosInstance.get('/users/current_user/').then(json => {
-      setUsername(json.data.username);
+      setUser(json.data);
       setLoggedIn(true);
+    }).catch(err => {
+      console.log(err);
     })
-  }, [username])
+  }, []);
 
-  const handleSuccessfulAuth = (username) => {
-    setLoggedIn(true);
-    setUsername(username);
+  const successfulAuthCallback = () => {
+    axiosInstance.get('/users/current_user/').then(json => {
+      setUser(json.data);
+      setLoggedIn(true);
+    }).catch(err => {
+      console.log(err);
+    });
   }
 
   const handleLogout = async () => {
@@ -33,7 +41,7 @@ function App() {
       localStorage.removeItem('refresh_token');
       axiosInstance.defaults.headers['Authorization'] = null;
       setLoggedIn(false);
-      setUsername('');
+      setUser(null);
       
       return response;
     } catch (e) {
@@ -42,44 +50,46 @@ function App() {
   }
 
   return (
-    <Router>
-      <header id="main-header">
-        <div className="container">
-          <div className="logo">Logo</div>
-          <Nav
-            loggedIn={loggedIn}
-            handleLogout={handleLogout}
-          />
-        </div>
-      </header>
-      <Switch>
-        <main className="container">
-          <Route exact path="/">
-            <div>Hello, {username}</div>
-            <button className="btn btn-success">
-              <Link to="/create-question">Create question</Link>
-            </button>
-          </Route>
-          <Route path="/create-question">
-            <CreateQuestion></CreateQuestion>
-          </Route>
-          <Route path="/login" render={(props) => 
-            <LoginForm
-              {...props}
+    <UserContext.Provider value={user}>
+      <Router>
+        <header id="main-header">
+          <div className="container">
+            <div className="logo">Logo</div>
+            <Nav
               loggedIn={loggedIn}
-              successfulAuthCallback={handleSuccessfulAuth}
-            />}
-          />
-          <Route path="/signup" render={(props) => 
-            <SignupForm
-              {...props} 
-              loggedIn={loggedIn} 
-              successfulAuthCallback={handleSuccessfulAuth}
-            />}
-          />
-        </main>
-      </Switch>
-    </Router>
+              handleLogout={handleLogout}
+            />
+          </div>
+        </header>
+        <Switch>
+          <main className="container">
+            <Route exact path="/">
+              <div>Hello, {user?.username}</div>
+              <button className="btn btn-success">
+                <Link to="/create-question">Create question</Link>
+              </button>
+            </Route>
+            <Route path="/create-question">
+              <CreateQuestion></CreateQuestion>
+            </Route>
+            <Route path="/login" render={(props) => 
+              <LoginForm
+                {...props}
+                loggedIn={loggedIn}
+                successfulAuthCallback={successfulAuthCallback}
+              />}
+            />
+            <Route path="/signup" render={(props) => 
+              <SignupForm
+                {...props} 
+                loggedIn={loggedIn} 
+                successfulAuthCallback={successfulAuthCallback}
+              />}
+            />
+          </main>
+        </Switch>
+      </Router>
+    </UserContext.Provider>
   );
 }
 

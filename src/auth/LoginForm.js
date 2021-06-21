@@ -25,7 +25,7 @@ export default function LoginForm(props) {
             localStorage.setItem('access_token', resp.data.access);
             localStorage.setItem('refresh_token', resp.data.refresh);
             // set global App variable 'username'
-            props.successfulAuthCallback(username);
+            props.successfulAuthCallback();
             props.history.push('/');
 
         } catch(error) {

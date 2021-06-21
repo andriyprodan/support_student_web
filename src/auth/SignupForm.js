@@ -37,7 +37,7 @@ export default function SignupForm(props) {
             localStorage.setItem('access_token', tokens_resp.data.access);
             localStorage.setItem('refresh_token', tokens_resp.data.refresh);
             // set global App state 'username'
-            props.successfulAuthCallback(username);
+            props.successfulAuthCallback();
             props.history.push('/');
 
         } catch (error) {

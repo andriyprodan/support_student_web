@@ -48,11 +48,8 @@ function TextEditor(props) {
 
     // set history with delay when the content changes
     useEffect(() => {
-        
         let saveDelay;
-
-        console.log('history', history);
-        console.log('content', content);
+        props.contentChangeCallback(content);
 
         if (history[currContentIndex] !== content){
             saveDelay = setTimeout(() => {

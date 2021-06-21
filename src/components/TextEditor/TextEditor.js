@@ -10,50 +10,62 @@ const PROTOCOLS = ['https://', 'http://']
 
 function TextEditor(props) {
     const [content, setContent] = useState('');
-    const [selection, setSelection] = useState({selectTextOnComponentUpdate: false});
-    const textArea = useRef(null);
-
     const [history, setHistory] = useState([content]);
     const [currContentIndex, setCurrContentIndex] = useState(0);
 
-    function handleContentChange(e) {
-        setContent(e.target.value);
-    }
+    const [selection, setSelection] = useState(null);
+    const textAreaRef = useRef(null);
 
     // Set selection on the textarea
     useEffect(() => {
-        if (selection.selectTextOnComponentUpdate) {
-            textArea.current.focus();
-            textArea.current.selectionEnd = selection.end;
-            textArea.current.setSelectionRange(selection.start, selection.end);
-            setSelection({
-                ...selection,
-                selectTextOnComponentUpdate: false,
-            });
+        if (selection) {
+            textAreaRef.current.focus();
+            textAreaRef.current.selectionStart = selection?.start;
+            textAreaRef.current.selectionEnd = selection?.end;
         }
     }, [selection,]);
 
-    let lastBackspacedContent = useRef('');
-    useEffect(() => {
-        if (lastBackspacedContent.current.length && lastBackspacedContent.current !== content) {
-            setHistory(history.slice(0, currContentIndex+1).concat([lastBackspacedContent.current]));
-            setCurrContentIndex(currContentIndex + 1);
+    const addPrevContentToHistory = useRef(true);
+    function handleContentChange(e) {
+        setContent(e.target.value);
+
+        if (e.target.value.length < content.length) {
+            if (addPrevContentToHistory.current) {
+                if (history[currContentIndex] !== content) {
+                    setHistory(history.concat([content]));
+                    setCurrContentIndex(prev => prev + 1);
+                }
+                addPrevContentToHistory.current = false;
+            }
+        } else if (
+            e.target.value.length > content.length && 
+            content.length < history[currContentIndex].length
+        ) {
+            setHistory(history.concat([content]));
+            setCurrContentIndex(prev => prev + 1);
         }
-    }, [content]);
-    // set history with delay, when the content changes
+    }
+
+    // set history with delay when the content changes
     useEffect(() => {
+        
         let saveDelay;
+
+        console.log('history', history);
+        console.log('content', content);
+
         if (history[currContentIndex] !== content){
             saveDelay = setTimeout(() => {
                 setHistory(history.slice(0, currContentIndex+1).concat([content]));
-                setCurrContentIndex(currContentIndex + 1);
+                setCurrContentIndex(prev => prev + 1);
+                addPrevContentToHistory.current = true;
             }, 500);
         }
 
         return (() => {
             clearTimeout(saveDelay);
         });
-    }, [content, history]);
+    }, [content,]);
 
     function undo() {
         if (content !== history[currContentIndex]) {
@@ -75,7 +87,6 @@ function TextEditor(props) {
         }
     }
 
-    // Undo / Redo shortcuts
     function handleTextAreaKeyDown(e) {
         if (e.ctrlKey) {
             let haveMatched = true;
@@ -93,17 +104,25 @@ function TextEditor(props) {
                 e.preventDefault();
             }
         }
-
-        let key = e.keyCode || e.charCode;
-        // backspaceClicked
-        if (key == 8 || key == 46) {
-            let taValue = textArea.current.value;
-            lastBackspacedContent.current = taValue.substring(0, taValue.length-1);
+        if (e.key == 'Tab') {
+            e.preventDefault();
+            let ta = textAreaRef.current;
+            let start = ta.selectionStart;
+            let end = ta.selectionEnd;
+            let new_content = ta.value.substring(0, start) +
+            "\t" + ta.value.substring(end);
+            setContent(new_content);
+            setHistory(history.concat([new_content]));
+            setCurrContentIndex(prev => prev + 1);
+            setSelection({
+                start: start+1,
+                end: start+1
+            })
         }
     }
 
     function wrapSelectedText(openTag, closeTag, placeholder='', selectWrappedText = true) {
-        let ta = textArea.current;
+        let ta = textAreaRef.current;
 
         let len = ta.value.length;
         let start = ta.selectionStart;
@@ -133,7 +152,6 @@ function TextEditor(props) {
 
         if (selectWrappedText) {
             setSelection({
-                selectTextOnComponentUpdate: true,
                 start: start + openTag.length,
                 end: start + openTag.length + text.length
             })
@@ -149,7 +167,7 @@ function TextEditor(props) {
     }
 
     function handleHyperlinkIconClick() {
-        let ta = textArea.current;
+        let ta = textAreaRef.current;
 
         let selectedText = ta.value.substring(ta.selectionStart, ta.selectionEnd);
 
@@ -269,7 +287,7 @@ function TextEditor(props) {
                     value={content}
                     onChange={handleContentChange}
                     onKeyDown={handleTextAreaKeyDown}
-                    ref={textArea}
+                    ref={textAreaRef}
                 ></textarea>
                 <div className="markdown-result">
                     <ReactMarkdown 

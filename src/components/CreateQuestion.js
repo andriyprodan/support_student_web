@@ -7,7 +7,7 @@ import SubjectsList from './SubjectsList';
 
 import { default as axiosInstance, baseURL } from '../axiosApi';
 
-function CreateQuestion() {
+function CreateQuestion(props) {
     const [data, setData] = useState(null);
     const user = useContext(UserContext);
 
@@ -30,14 +30,11 @@ function CreateQuestion() {
     async function handleSubmit(e) {
         e.preventDefault();
         try {
-            console.log({
-                ...data,
-                author_id: user.id.toString()
-            });
             const resp = await axiosInstance.post('/questions/', {
                 ...data,
                 author_id: user.id.toString()
             });
+            props.history.push(`/question/${resp.data.id}`)
         } catch (err) {
             console.log(err);
         }

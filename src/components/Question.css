@@ -1,0 +1,14 @@
+.question {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.question .title {
+  padding: 0 2rem;
+  margin: 2rem 0 1.5rem 0;
+}
+
+.question .content {
+  padding: .5em 2rem;
+}
+/*# sourceMappingURL=Question.css.map */

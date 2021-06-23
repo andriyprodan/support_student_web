@@ -7,6 +7,7 @@ import CreateQuestion from './components/CreateQuestion';
 import LoginForm from './auth/LoginForm';
 import SignupForm from './auth/SignupForm';
 import axiosInstance from './axiosApi';
+import Question from './components/Question';
 
 export const UserContext = React.createContext(null);
 
@@ -66,12 +67,19 @@ function App() {
             <Route exact path="/">
               <div>Hello, {user?.username}</div>
               <button className="btn btn-success">
-                <Link to="/create-question">Create question</Link>
+                <Link to="/create-question">Ask Question</Link>
               </button>
             </Route>
-            <Route path="/create-question">
-              <CreateQuestion></CreateQuestion>
-            </Route>
+            <Route path="/create-question" render={(props) => 
+              <CreateQuestion {...props}
+              />}
+            />
+            <Route 
+              path="/question/:id" 
+              render={(props) => {
+                return <Question />;
+              }}
+            />
             <Route path="/login" render={(props) => 
               <LoginForm
                 {...props}

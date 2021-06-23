@@ -1,19 +1,22 @@
 import React, {useState, useEffect} from 'react';
 import './App.css';
-import {BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import {BrowserRouter as Router, Switch, Route, } from 'react-router-dom';
 
 import Nav from './components/Nav';
+import HomePage from './pages/HomePage';
 import CreateQuestion from './components/CreateQuestion';
 import LoginForm from './auth/LoginForm';
 import SignupForm from './auth/SignupForm';
 import axiosInstance from './axiosApi';
 import Question from './components/Question';
+import PrivateRoute from './components/PrivateRoute';
 
 export const UserContext = React.createContext(null);
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
+  const [successfullyAuthentificated, setSuccessfullyAuthentificated] = useState(false);
 
   useEffect(() => {
     axiosInstance.get('/users/current_user/').then(json => {
@@ -22,15 +25,10 @@ function App() {
     }).catch(err => {
       console.log(err);
     })
-  }, []);
+  }, [successfullyAuthentificated]);
 
   const successfulAuthCallback = () => {
-    axiosInstance.get('/users/current_user/').then(json => {
-      setUser(json.data);
-      setLoggedIn(true);
-    }).catch(err => {
-      console.log(err);
-    });
+    setSuccessfullyAuthentificated(true);
   }
 
   const handleLogout = async () => {
@@ -64,17 +62,18 @@ function App() {
         </header>
         <Switch>
           <main className="container">
-            <Route exact path="/">
-              <div>Hello, {user?.username}</div>
-              <button className="btn btn-success">
-                <Link to="/create-question">Ask Question</Link>
-              </button>
-            </Route>
-            <Route path="/create-question" render={(props) => 
-              <CreateQuestion {...props}
-              />}
+            <Route
+              exact
+              path="/"
+              render={(props) => {
+                return <HomePage {...props}/>
+              }} 
             />
-            <Route 
+            <PrivateRoute
+              path="/create-question"
+              component={CreateQuestion}
+            />
+            <Route
               path="/question/:id" 
               render={(props) => {
                 return <Question />;

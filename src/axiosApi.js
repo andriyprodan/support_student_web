@@ -18,7 +18,7 @@ axiosInstance.interceptors.response.use(
         const originalRequest = error.config;
 
         if (error.response.status === 401 && originalRequest.url === 'users/token/refresh/') {
-            window.location.href = '/login/';
+            // window.location.href = '/login/';
             return Promise.reject(error);
         }
 

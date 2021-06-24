@@ -11,9 +11,9 @@ function CreateQuestion(props) {
     const [data, setData] = useState(null);
     const user = useContext(UserContext);
 
-    const contentChangeCallback = useCallback((new_content) => {
+    function contentChangeCallback(new_content) {
         setData({...data, 'content': new_content});
-    });
+    };
 
     function handleTitleChange(e) {
         setData({...data, 'title': e.target.value});
@@ -59,6 +59,7 @@ function CreateQuestion(props) {
                     contentChangeCallback={contentChangeCallback}
                     axiosInstance={axiosInstance}
                     uploadImagesURL={baseURL + 'upload_question_image/'}
+                    minHeight="400px"
                 />
             </div>
             <div className="form-group">

@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import './App.css';
-import {BrowserRouter as Router, Switch, Route, } from 'react-router-dom';
+import {BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
 import Nav from './components/Nav';
 import HomePage from './pages/HomePage';
@@ -53,7 +53,8 @@ function App() {
       <Router>
         <header id="main-header">
           <div className="container">
-            <div className="logo">Logo</div>
+            <div className="logo"><Link to="/">Logo</Link></div>
+            <div>{user?.username}</div>
             <Nav
               loggedIn={loggedIn}
               handleLogout={handleLogout}
@@ -62,6 +63,11 @@ function App() {
         </header>
         <Switch>
           <main className="container">
+            <div className="ask-q-container">
+              <button className="btn btn-primary ask-q-btn">
+                <Link to="/create-question">Ask Question</Link>
+              </button>
+            </div>
             <Route
               exact
               path="/"

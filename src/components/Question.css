@@ -10,5 +10,43 @@
 
 .question .content {
   padding: .5em 2rem;
+  font-size: 1.3em;
+}
+
+.question hr {
+  margin-bottom: .2em;
+}
+
+.user-container {
+  text-align: right;
+  padding: .5em 1em;
+}
+
+.ask-q-container {
+  text-align: right;
+  width: 93.5%;
+}
+
+.ask-q-btn a {
+  color: white;
+}
+
+.user-label {
+  margin: 1em 1em 0 0;
+  padding: .3em 1em;
+  border: 1px solid gainsboro;
+}
+
+.user-label-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+.create-answer {
+  margin-top: 7em;
 }
 /*# sourceMappingURL=Question.css.map */

@@ -238,40 +238,43 @@ function TextEditor(props) {
     }
 
     return (
-        <div className="form-group">
+        <div className={props.vertical ? "form-group markdown-text-editor vertical" : "form-group markdown-text-editor"}>
             <div className="content-label">{ props.label }</div>
+
             <div className="markdown-control-panel">
-                <div className="text-type">
-                    <i className="fa fa-bold" onClick={handleBoldIconClick}></i>
-                    <i className="fa fa-italic" onClick={handleItalicIconClick}></i>
+                <div className="markdown-control-panel__inner">
+                    <div className="text-type">
+                        <i className="fa fa-bold" onClick={handleBoldIconClick}></i>
+                        <i className="fa fa-italic" onClick={handleItalicIconClick}></i>
+                    </div>
+
+                    <div className="text-format">
+                        <i className="fa fa-link" onClick={handleHyperlinkIconClick}></i>
+                        <i className="fa fa-image" onClick={toggleImageUploadDialogue}></i>
+                    </div>
+
+                    <div className="lists">
+                        <i className="fa fa-list-ol" onClick={toggleOrderedListIconClick}></i>
+                        <i className="fa fa-list" onClick={toggleUnorderedListIconClick}></i>
+                    </div>
+
+                    <div className="undo-redo">
+                        <i className="fa fa-undo" onClick={undo}></i>
+                        <i className="fa fa-redo" onClick={redo}></i>
+                    </div>
                 </div>
 
-                <div className="text-format">
-                    <i className="fa fa-link" onClick={handleHyperlinkIconClick}></i>
-                    <i className="fa fa-image" onClick={toggleImageUploadDialogue}></i>
-                </div>
-
-                <div className="lists">
-                    <i className="fa fa-list-ol" onClick={toggleOrderedListIconClick}></i>
-                    <i className="fa fa-list" onClick={toggleUnorderedListIconClick}></i>
-                </div>
-
-                <div className="undo-redo">
-                    <i className="fa fa-undo" onClick={undo}></i>
-                    <i className="fa fa-redo" onClick={redo}></i>
-                </div>
-            </div>
-
-            <div className="image-upload-dialogue" style={{display: 'none', maxHeight: "0"}}>
-                <div className="image-upload-dialogue__inner">
-                    <div id="image-preview" ref={imagePreview}></div>
-                    <div>
-                        <p>Choose image:</p>
-                        <div className="image-input-group">
-                            <label htmlFor="image-input">Choose Image</label>
-                            <input type="file" id="image-input" ref={imageInput} className="image-input" onChange={handleImagePreview}/>
+                <div className="image-upload-dialogue" style={{display: 'none', maxHeight: "0"}}>
+                    <div className="image-upload-dialogue__inner">
+                        <div id="image-preview" ref={imagePreview}></div>
+                        <div>
+                            <p>Choose image:</p>
+                            <div className="image-input-group">
+                                <label htmlFor="image-input">Choose Image</label>
+                                <input type="file" id="image-input" ref={imageInput} className="image-input" onChange={handleImagePreview}/>
+                            </div>
+                            <button className="btn btn-info d-b" onClick={handleAddImageBtnClick}>Add Image</button>
                         </div>
-                        <button className="btn btn-info d-b" onClick={handleAddImageBtnClick}>Add Image</button>
                     </div>
                 </div>
             </div>
@@ -285,8 +288,9 @@ function TextEditor(props) {
                     onChange={handleContentChange}
                     onKeyDown={handleTextAreaKeyDown}
                     ref={textAreaRef}
+                    style={{minHeight: props.minHeight}}
                 ></textarea>
-                <div className="markdown-result">
+                <div className="markdown-result" style={{minHeight: props.minHeight}}>
                     <ReactMarkdown 
                         remarkPlugins={[remarkMath]}
                         rehypePlugins={[rehypeKatex]}

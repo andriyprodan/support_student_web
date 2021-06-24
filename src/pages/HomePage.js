@@ -9,9 +9,6 @@ export default function HomePage(props) {
     return (
         <div>
             <div>Hello, {user?.username}</div>
-            <button className="btn btn-success">
-                <Link to="/create-question">Ask Question</Link>
-            </button>
         </div>
     )
 }
